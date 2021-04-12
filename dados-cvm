@@ -1,0 +1,49 @@
+"""
+Simulando carteira de investimentos
+"""
+import pandas as pd
+
+pd.set_option('display.max_colwidth', 150)
+pd.set_option('display.max_rows',1000,'display.max_columns',1000)
+pd.set_option('display.max_colwidth',200)
+
+def busca_informes_cvm(ano, mes):
+    url = 'http://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/inf_diario_fi_{:02d}{:02}.csv'.format(ano, mes)  # Dados retirados do site da CVM atualizados de forma automática.
+    return pd.read_csv(url, sep=';')
+
+a = input('Digite o ano: ')
+b = input('Digite o mês: ')
+a = int(a)
+b = int(b)
+informes_diarios = busca_informes_cvm(a, b)
+
+def busca_cadastro_cvm():
+    url = 'C:/Users/User/Desktop/Rumo ao sucesso/Curso de Python/cad_fi.csv'  # Dados de cadastro baixados do site da CVM
+    return pd.read_csv(url, sep=';')
+cadastro_cvm = busca_cadastro_cvm()
+
+minimo_cotitas = 100
+fundos = informes_diarios[informes_diarios['NR_COTST']>=minimo_cotitas].pivot(index='DT_COMPTC', columns='CNPJ_FUNDO',
+            values=['VL_TOTAL', 'VL_QUOTA', 'VL_PATRIM_LIQ', 'CAPTC_DIA', 'RESG_DIA'])
+cotas_normalizadas = fundos['VL_QUOTA']/fundos['VL_QUOTA'].iloc[0]
+melhores = pd.DataFrame()
+melhores['Retorno(%)'] = (cotas_normalizadas.iloc[1].sort_values(ascending=False)[:5]-1)*100
+
+for cnpj in melhores.index:
+    fundo = cadastro_cvm[cadastro_cvm['CNPJ_FUNDO'] == cnpj]
+    melhores.at[cnpj, 'Fundo de investimento'] = fundo['DENOM_SOCIAL'].values[0]
+    melhores.at[cnpj, 'Patrim. liquido'] = fundo['VL_PATRIM_LIQ'].values[0]
+
+piores = pd.DataFrame()
+piores['Retorno(%)'] = (cotas_normalizadas.iloc[1].sort_values(ascending=True)[:5]-1)*100
+
+for cnpj in piores.index:
+    fundo = cadastro_cvm[cadastro_cvm['CNPJ_FUNDO'] == cnpj]
+    piores.at[cnpj, 'Fundo de investimento'] = fundo['DENOM_SOCIAL'].values[0]
+    piores.at[cnpj, 'Patrim. liquido'] = fundo['VL_PATRIM_LIQ'].values[0]
+
+print(f'Os melhores  fundos de investimentos do ano {a}, mês {b} são: ')
+print(f'{melhores}')
+print('\n')
+print(f'E os piores são: ')
+print(f'{piores}')
