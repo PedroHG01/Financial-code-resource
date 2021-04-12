@@ -1,0 +1,18 @@
+"""
+Calculando taxa de retorno de um ativo
+"""
+from pandas_datareader import data as wb
+import matplotlib.pyplot as plt
+
+def tickers(atv):
+    atv = wb.DataReader(atv, data_source='yahoo', start='2010-1-1')
+    atv['simple_return'] = (atv['Adj Close'] / atv['Adj Close'].shift(1)) - 1
+    avg_returns_a = atv['simple_return'].mean() * 250
+    final_avg_annual = round(avg_returns_a, 5) * 100
+    atv['simple_return'].plot(figsize=(8, 5))
+    return print(f'A taxa média de retorno atual do ativo é de {final_avg_annual}%.'), plt.show()
+
+atv = input('Calculando taxa de retorno de um ativo de 2010 em diante,'
+' digite o símbolo do ativo (Plataforma Yahoo Finance): ')
+atv = atv.upper()
+result = tickers(atv)
