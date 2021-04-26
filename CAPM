@@ -1,0 +1,29 @@
+"""
+Modelo de precificação de Ativos Financeiros - CAPM
+Calculando Beta
+"""
+
+import numpy as np
+import pandas as pd
+from pandas_datareader import data as wb
+
+tickers = ['PG', '^GSPC']
+data = pd.DataFrame()
+for t in tickers:
+    data[t] = wb.DataReader(t,'yahoo',start='2012-1-1',end='2016-12-31')['Adj Close']
+sec_returns = np.log(data/data.shift(1))
+cov = sec_returns.cov()*250
+cov_with_market = cov.iloc[0,1]
+market_var = sec_returns['^GSPC'].var()*250
+PG_beta = cov_with_market/market_var  # Beta é o indicador da ação (agressiva (>1), defensiva (<1) ou independente (=0))
+if PG_beta == 0:
+    ind = 'ativo independente'
+elif PG_beta >= 1:
+    ind = 'ativo agressivo'
+else:
+    ind = 'ativo defensivo'
+PG_er = 0.025 + PG_beta*0.05  # Expectativa de retorno em um ativo "livre de risco"
+Sharpe = (PG_er - 0.025) / (sec_returns['PG'].std()*250**0.5)
+PG_er = PG_er*100
+#Indice Sharpe compara a taxa de retorno com a volatilidade da ação
+print(f'O beta da ação da PG é {PG_beta:0.3f}, sendo um {ind}, sua expectativa de retorno através do CAPM é {PG_er:0.2f}% e seu indice Sharpe é {(Sharpe*100):0.2f}%')
