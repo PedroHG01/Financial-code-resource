@@ -1,0 +1,37 @@
+"""
+Simulação de Monte de Carlo
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Utilizando em cáluclo de estimativa da receita de uma empresa:
+
+rev_m = 170  #Receita média anual esperada
+rev_stdev = 20  #desvio padrão da receita média
+iterations = 1000  #quant. de simulações
+
+rev = np.random.normal(rev_m, rev_stdev, iterations)  #distribuição simulada gráfica das receitas esperadas
+# plt.figure(figsize=(15,6))
+# plt.plot(rev)
+# plt.show()
+
+COGS = - (rev * np.random.normal(0.6,0.1))  #custo das mercadorias vendidas estimado ou custo anual estimado
+
+# plt.figure(figsize=(15, 6))
+# plt.plot(COGS)
+# plt.show()
+
+# print(COGS.mean())
+# print(COGS.std())
+
+Gross_profit = rev + COGS  #Lucro bruto (Receita - custo)
+
+# plt.figure(figsize=(12,4))
+# plt.plot(Gross_profit)
+# plt.show()
+
+print(max(Gross_profit), min(Gross_profit), Gross_profit.mean(), Gross_profit.std())
+
+plt.figure(figsize=(10, 6))
+plt.hist(Gross_profit, bins = 20)
+plt.show()
